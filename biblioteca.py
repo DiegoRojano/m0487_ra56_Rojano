@@ -202,3 +202,77 @@ class Biblioteca:
         cursor.execute("UPDATE llibres SET dni_prestec = NULL WHERE titol = ?", (titol,))
         self.conn.commit()
 
+def menu():
+    """
+    Mostra un menú interactiu per gestionar usuaris i llibres de la biblioteca.
+    Permet afegir, llistar i eliminar usuaris i llibres.
+    """
+    biblioteca = Biblioteca()
+    while True:
+        print("\n--- MENÚ BIBLIOTECA ---")
+        print("1. Afegir usuari")
+        print("2. Llistar usuaris")
+        print("3. Eliminar usuari")
+        print("4. Afegir llibre")
+        print("5. Llistar llibres")
+        print("6. Eliminar llibre")
+        print("0. Sortir")
+        opcio = input("Escull una opció: ").strip()
+
+        if opcio == "1":
+            # Afegir usuari nou
+            usuari = Usuari()
+            usuari.introduir_dades()
+            biblioteca.afegir_usuari(usuari)
+            print("Usuari afegit.")
+
+        elif opcio == "2":
+            # Llistar tots els usuaris
+            usuaris = biblioteca.imprimir_usuaris()
+            if usuaris:
+                print("\n--- Usuaris registrats ---")
+                for u in usuaris:
+                    print(f"Nom: {u[1]} {u[2]}, DNI: {u[0]}")
+            else:
+                print("No hi ha usuaris a la base de dades.")
+
+        elif opcio == "3":
+            # Eliminar un usuari
+            dni = input("Introdueix el DNI de l'usuari a eliminar: ").strip()
+            biblioteca.eliminar_usuari(dni)
+            print("Usuari eliminat (si existia).")
+
+        elif opcio == "4":
+            # Afegir llibre nou
+            llibre = Llibre()
+            llibre.introduir_dades()
+            biblioteca.afegir_llibre(llibre)
+            print("Llibre afegit.")
+
+        elif opcio == "5":
+            # Llistar tots els llibres
+            llibres = biblioteca.imprimir_llibres()
+            if llibres:
+                print("\n--- Llibres registrats ---")
+                for l in llibres:
+                    estat = f"Prestat a: {l[2]}" if l[2] else "Disponible"
+                    print(f"Títol: {l[0]}, Autor: {l[1]}, {estat}")
+            else:
+                print("No hi ha llibres a la base de dades.")
+
+        elif opcio == "6":
+            # Eliminar un llibre
+            titol = input("Introdueix el títol del llibre a eliminar: ").strip()
+            biblioteca.eliminar_llibre(titol)
+            print("Llibre eliminat (si existia).")
+
+        elif opcio == "0":
+            print("Sortint del programa...")
+            break
+
+        else:
+            print("Opció no vàlida. Torna-ho a provar.")
+
+# Executa el menú si aquest arxiu és el principal
+if __name__ == "__main__":
+    menu()
