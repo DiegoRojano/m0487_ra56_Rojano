@@ -14,7 +14,17 @@ if not os.path.exists(DB):
 
 # Classe Usuari
 class Usuari:
-    """Classe que representa un usuari amb atributs bàsics com el nom, cognoms i DNI."""
+    """Classe que representa un usuari amb atributs bàsics com el nom, cognoms i DNI.
+
+    Atributs:
+        nom (str): El nom de l'usuari. Per defecte és "None".
+        cognoms (str): Els cognoms de l'usuari. Per defecte és "None".
+        dni (str): El DNI de l'usuari. Per defecte és "None".
+
+    Mètodes:
+        __init__(nom="None", cognoms="None", dni="None"):
+            Inicialitza una instància de la classe Usuari amb els atributs especificats.
+    """
     def __init__(self, nom="None", cognoms="None", dni="None"):
         self.nom = nom
         self.cognoms = cognoms
@@ -34,10 +44,26 @@ class Usuari:
             print(f"Error a la introducció de dades: {e}")
             self.introduir_dades()
 
-
 # Classe Llibre
 class Llibre:
-    """Classe que representa un llibre amb títol, autor i possible prestatari (DNI)."""
+    """Classe que representa un llibre amb títol, autor i possible prestatari (DNI).
+
+    Atributs:
+        titol (str): El títol del llibre. Per defecte és "None".
+        autor (str): L'autor del llibre. Per defecte és "None".
+        dni_prestec (str): DNI de l'usuari que té el llibre en préstec, o None si està disponible.
+
+    Mètodes:
+        __init__(titol="None", autor="None", dni_prestec=None):
+            Inicialitza una instància de la classe Llibre amb els atributs especificats.
+
+        imprimir_dades():
+            Mostra per pantalla les dades del llibre. Indica si està prestat o disponible.
+
+        introduir_dades():
+            Permet introduir les dades del llibre manualment mitjançant l'entrada de l'usuari.
+            Valida que el títol i l'autor no estiguin buits. Torna a demanar dades si hi ha error.
+    """
     def __init__(self, titol="None", autor="None", dni_prestec=None):
         self.titol = titol
         self.autor = autor
@@ -59,10 +85,47 @@ class Llibre:
             print(f"Error a la introducció de dades: {e}")
             self.introduir_dades()
 
-
 # Classe Biblioteca
 class Biblioteca:
-    """Classe que gestiona les operacions de la biblioteca amb SQLite."""
+    """Classe que gestiona les operacions de la biblioteca mitjançant SQLite.
+
+    Aquesta classe permet crear la base de dades, gestionar usuaris i llibres,
+    així com realitzar operacions com préstecs, devolucions, insercions i eliminacions.
+
+    Atributs:
+        conn (sqlite3.Connection): Connexió activa amb la base de dades SQLite.
+
+    Mètodes:
+        __init__():
+            Inicialitza la connexió amb la base de dades i crea les taules si no existeixen.
+
+        crear_taules():
+            Crea les taules 'usuaris' i 'llibres' dins la base de dades.
+
+        afegir_usuari(usuari: Usuari):
+            Afegeix un nou usuari a la base de dades. Mostra error si el DNI ja existeix.
+
+        afegir_llibre(llibre: Llibre):
+            Afegeix un nou llibre a la base de dades. Mostra error si el títol ja existeix.
+
+        imprimir_usuaris() -> list:
+            Retorna una llista de tuples amb tots els usuaris registrats.
+
+        imprimir_llibres(filtre: str = "tots") -> list:
+            Retorna llibres segons el filtre indicat: "tots", "disponibles" o "prestats".
+
+        eliminar_usuari(dni: str):
+            Elimina un usuari de la base de dades pel seu DNI.
+
+        eliminar_llibre(titol: str):
+            Elimina un llibre de la base de dades pel seu títol.
+
+        prestar_llibre(titol: str, dni: str):
+            Assigna un préstec d’un llibre a un usuari pel seu DNI.
+
+        tornar_llibre(titol: str):
+            Marca un llibre com a retornat, esborrant el DNI del préstec.
+    """
     def __init__(self):
         self.conn = sqlite3.connect(DB)
         self.crear_taules()
@@ -138,3 +201,4 @@ class Biblioteca:
         cursor = self.conn.cursor()
         cursor.execute("UPDATE llibres SET dni_prestec = NULL WHERE titol = ?", (titol,))
         self.conn.commit()
+
