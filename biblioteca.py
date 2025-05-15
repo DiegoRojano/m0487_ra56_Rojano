@@ -201,11 +201,10 @@ class Biblioteca:
         cursor = self.conn.cursor()
         cursor.execute("UPDATE llibres SET dni_prestec = NULL WHERE titol = ?", (titol,))
         self.conn.commit()
-
 def menu():
     """
     Mostra un menú interactiu per gestionar usuaris i llibres de la biblioteca.
-    Permet afegir, llistar i eliminar usuaris i llibres.
+    Permet afegir, llistar, eliminar usuaris i llibres, i gestionar préstecs.
     """
     biblioteca = Biblioteca()
     while True:
@@ -216,6 +215,8 @@ def menu():
         print("4. Afegir llibre")
         print("5. Llistar llibres")
         print("6. Eliminar llibre")
+        print("7. Prestar llibre")     # Opció nova: prestar llibre
+        print("8. Tornar llibre")      # Opció nova: tornar llibre
         print("0. Sortir")
         opcio = input("Escull una opció: ").strip()
 
@@ -246,6 +247,8 @@ def menu():
             # Afegir llibre nou
             llibre = Llibre()
             llibre.introduir_dades()
+            # Quan s'afegeix, el llibre està disponible (dni_prestec = "0")
+            llibre.dni_prestec = "0"
             biblioteca.afegir_llibre(llibre)
             print("Llibre afegit.")
 
@@ -255,7 +258,7 @@ def menu():
             if llibres:
                 print("\n--- Llibres registrats ---")
                 for l in llibres:
-                    estat = f"Prestat a: {l[2]}" if l[2] else "Disponible"
+                    estat = f"Prestat a: {l[2]}" if l[2] and l[2] != "0" else "Disponible"
                     print(f"Títol: {l[0]}, Autor: {l[1]}, {estat}")
             else:
                 print("No hi ha llibres a la base de dades.")
@@ -265,6 +268,41 @@ def menu():
             titol = input("Introdueix el títol del llibre a eliminar: ").strip()
             biblioteca.eliminar_llibre(titol)
             print("Llibre eliminat (si existia).")
+
+        # --- OPCIÓ 7: Prestar llibre a un usuari ---
+        elif opcio == "7":
+            titol = input("Títol del llibre a prestar: ").strip()
+            dni = input("DNI de l'usuari que el rep: ").strip()
+            # Comprova que l'usuari existeix
+            usuaris = biblioteca.imprimir_usuaris()
+            if not any(u[0] == dni for u in usuaris):
+                print("No existeix cap usuari amb aquest DNI.")
+                continue
+            # Comprova que el llibre existeix i està disponible (dni_prestec == "0")
+            cursor = biblioteca.conn.cursor()
+            cursor.execute("SELECT dni_prestec FROM llibres WHERE titol = ?", (titol,))
+            resultat = cursor.fetchone()
+            if not resultat:
+                print("No existeix cap llibre amb aquest títol.")
+            elif resultat[0] != "0":
+                print("Aquest llibre ja està prestat.")
+            else:
+                biblioteca.prestar_llibre(titol, dni)
+                print(f"Llibre '{titol}' prestat a l'usuari {dni}.")
+
+        # --- OPCIÓ 8: Tornar llibre prestat ---
+        elif opcio == "8":
+            titol = input("Títol del llibre a tornar: ").strip()
+            cursor = biblioteca.conn.cursor()
+            cursor.execute("SELECT dni_prestec FROM llibres WHERE titol = ?", (titol,))
+            resultat = cursor.fetchone()
+            if not resultat:
+                print("No existeix cap llibre amb aquest títol.")
+            elif resultat[0] == "0":
+                print("Aquest llibre no està en préstec.")
+            else:
+                biblioteca.prestar_llibre(titol, "0")  # Torna el llibre posant "0"
+                print(f"Llibre '{titol}' retornat correctament.")
 
         elif opcio == "0":
             print("Sortint del programa...")
