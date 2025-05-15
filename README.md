@@ -82,5 +82,5 @@ Quan executes el programa, veuràs aquest menú:
     -Permetre exportar i importar dades a CSV o JSON.
 
 ### Crèdits
-Creat per [El Teu Nom], 2025.
-El Teu GitHub
+Creat per [Diego Rojano], 2025.
+https://github.com/DiegoRojano/m0487_ra56_Rojano
